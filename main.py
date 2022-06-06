@@ -12,7 +12,8 @@ from os import path
 from loguru import logger 
 
 from time import sleep 
-from rich.progress import track 
+from rich.progress import track
+from torch import tensor 
 
 from strategies import * 
 
@@ -60,10 +61,14 @@ def annotation(path2videos, extension, window_size, stride, path2data, path2vect
                 character = chr(key_code)
                 if character in 'an':
                     logger.debug(f'key_code : {key_code:03d}')
-                    frames_memory.append(bgr_frame)
+                    tensor_ = cv2th(bgr_frame)
+                    single_batch = tensor_[None, ...]
+                    out_features = th.flatten(vectorizer(single_batch))  # 512 
+                    frames_memory.append(out_features.numpy())
                     if len(frames_memory) == window_size:
-                        label = 1 if character == 'a' else 0   
-                        accumulator.append((frames_memory, label))
+                        label = 1 if character == 'a' else 0
+                        stacked_embedding = np.vstack(frames_memory)  # 7x512   
+                        accumulator.append((stacked_embedding, label))
                         frames_memory = frames_memory[stride:]  # ignore 0 .. stride - 1
             # end if ...!
         # end while loop 

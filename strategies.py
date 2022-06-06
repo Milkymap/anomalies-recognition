@@ -19,6 +19,15 @@ def read_image(path2image, size=None):
         image = cv2.resize(image, size, cv2.INTER_CUBIC)
     return image 
 
+def cv2th(bgr_image):
+    blue, green, red = cv2.split(bgr_image)  # blue, green and red 
+    channels = [red, green, blue]
+    return th.as_tensor(np.stack(channels)).float()
+ 
+def th2cv(tensor_):
+    red, green, blue = tensor_.numpy() 
+    return cv2.merge((blue, green, red))
+
 def load_vectorizer(path2vectorizer):  # models/resnet.th 
     if path.isfile(path2vectorizer):
         vectorizer = th.load(path2vectorizer)
