@@ -33,9 +33,16 @@ def router_command(ctx, debug):
 @click.option('--window_size', help='size of frames_memory', default=7, type=int)
 @click.option('--stride', help='value of the stride', default=3)
 @click.option('--path2data', type=click.Path(False), required=True)
-def annotation(path2videos, extension, window_size, stride, path2data):
+@click.option('--path2vectorizer', help='path to resnetnet(backbone)', type=click.Path(False))
+def annotation(path2videos, extension, window_size, stride, path2data, path2vectorizer):
     video_paths = sorted(glob(path.join(path2videos, f'*.{extension}')))
     logger.debug(f'nb video files : {len(video_paths):03d}')
+    try:
+        vectorizer = load_vectorizer(path2vectorizer)
+        logger.debug('vectorizer is ready')
+    except Exception as e:
+        logger.error(e)
+        exit(1)
 
     accumulator = []
     for v_path in track(video_paths[1:2], 'video annotation'):
